@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">ConferenceDaily</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="Introduction">This is a draft application for the Conference Compass</string>
+    <string name="left">Next</string>
+    <string name="right">Before</string>
+</resources>
