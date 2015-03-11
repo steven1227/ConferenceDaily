@@ -43,10 +43,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
         List<String> weekForecast = new ArrayList<String>();
-
-
         this.meetingAdaptor =
                 new ArrayAdapter<String>(
                         this, // The current context (this activity)
@@ -62,8 +59,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
 
         weekForecast.clear();
-        weekForecast.add("steven8");
-
 
         final String name= "name";
         final String start= "start";
@@ -75,20 +70,28 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         SimpleDateFormat monthday =new SimpleDateFormat( "MMMM dd");
 
         weekday.setTimeZone(TimeZone.getTimeZone("GMT-5"));
+        monthday.setTimeZone(TimeZone.getTimeZone("GMT-5"));
+        duration.setTimeZone(TimeZone.getTimeZone("GMT-5"));
 
         String jsonStr = getJson(this.fileName);
+
         try {
             JSONArray array = new JSONArray(jsonStr);
             int len = array.length();
 
-            JSONObject dayForecast = array.getJSONObject(50);
-            String begin= duration.format(new Date (dayForecast.getInt(start)*1000L));
-            String stop = duration.format(new Date( dayForecast.getInt(end)*1000L));
-            String description = dayForecast.getString(name);
-            Log.v(LOG_TAG, "Forecast entry: " + weekday.format(new Date (dayForecast.getInt(start)*1000L)));
+            for ( int i=0;i<=len;i++)
+            {
+                JSONObject dayForecast = array.getJSONObject(i);
+                Date meetingtime1 = new Date(dayForecast.getInt(start) * 1000L);
+                Date meetingtime2 = new Date(dayForecast.getInt(end) * 1000L);
+                String begin = duration.format(meetingtime1);
+                String stop = duration.format(meetingtime2);
+                String day = weekday.format(meetingtime1);
+                String description = dayForecast.getString(name);
 
-            meetDay.setText( weekday.format(new Date (dayForecast.getInt(start)*1000L))+ "\n" +monthday.format(new Date (dayForecast.getInt(start)*1000L)));
-            weekForecast.add(description+"\n"+begin+" - "+stop+"\n"+"Location");
+                weekForecast.add("\n"+description + "\n\n" +"Time: "+ day + " " + begin + " - " + stop+"\n");
+            }
+          //  meetDay.setText( weekday.format(new Date (dayForecast.getInt(start)*1000L))+ "\n" +monthday.format(new Date (dayForecast.getInt(start)*1000L)));
 
 
 
@@ -97,6 +100,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         }
 
     }
+
     /**
      *
      */
