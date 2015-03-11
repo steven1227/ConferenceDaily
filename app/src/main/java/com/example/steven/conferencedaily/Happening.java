@@ -6,12 +6,10 @@ import android.os.Bundle;
 /**
  * Created by steven on 11-3-15.
  */
-public class Detail extends Activity {
+public class Happening extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.detail);
-
-        }
-
+        setContentView(R.layout.happening);
+    }
 }

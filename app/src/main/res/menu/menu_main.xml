@@ -3,6 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".MainActivity">
 
+    <item android:id="@+id/now"
+        android:title="@string/now"
+        android:orderInCategory="100"
+        app:showAsAction="always" />
 
     <item android:id="@+id/aboutus"
         android:title="AboutUs"
