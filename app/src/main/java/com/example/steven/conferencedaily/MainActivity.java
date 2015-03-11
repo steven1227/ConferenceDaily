@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -12,6 +13,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,10 +31,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-
-
-
         String[] data = {
                 "Mon ",
                 "Tue",
@@ -38,9 +40,30 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 "Sat ",
                 "Sun "
         };
+
+
+        String JSONString = null;
+        JSONObject JSONObject = null;
+
+        //open the inputStream to the file
+        try {
+            InputStream inputStream = getAssets().open("event1.json");
+            Log.i("??","1");
+
+
+
+        } catch (IOException e) {
+            Log.i("??","2");
+            e.printStackTrace();
+
+
+        }
+
+
         List<String> weekForecast = new ArrayList<String>(Arrays.asList(data));
 
-        this.meetingAdaptor=
+
+        this.meetingAdaptor =
                 new ArrayAdapter<String>(
                         this, // The current context (this activity)
                         R.layout.list_item_forecast, // The name of the layout ID.
@@ -48,14 +71,15 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                         weekForecast
                 );
 
-        meetinglist= (ListView) findViewById(R.id.listView);
+        meetinglist = (ListView) findViewById(R.id.listView);
         meetinglist.setAdapter(meetingAdaptor);
         meetinglist.setOnItemClickListener(this);
+
 
     }
 
 
-    @Override
+        @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
