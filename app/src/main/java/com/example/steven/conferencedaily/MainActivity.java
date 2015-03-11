@@ -11,56 +11,40 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 
 public class MainActivity extends ActionBarActivity implements AdapterView.OnItemClickListener {
     private ArrayAdapter<String> meetingAdaptor;
     private ListView meetinglist;
+    private TextView meetDay;
+    private final static String fileName = "events.json";
+    private final String LOG_TAG=MainActivity.class.getSimpleName();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        String[] data = {
-                "Mon ",
-                "Tue",
-                "Wed",
-                "Thurs ",
-                "Fri",
-                "Sat ",
-                "Sun "
-        };
 
-
-        String JSONString = null;
-        JSONObject JSONObject = null;
-
-        //open the inputStream to the file
-        try {
-            InputStream inputStream = getAssets().open("event1.json");
-            Log.i("??","1");
-
-
-
-        } catch (IOException e) {
-            Log.i("??","2");
-            e.printStackTrace();
-
-
-        }
-
-
-        List<String> weekForecast = new ArrayList<String>(Arrays.asList(data));
+        List<String> weekForecast = new ArrayList<String>();
 
 
         this.meetingAdaptor =
@@ -71,12 +55,67 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                         weekForecast
                 );
 
+        meetDay=(TextView)findViewById(R.id.textView);
         meetinglist = (ListView) findViewById(R.id.listView);
         meetinglist.setAdapter(meetingAdaptor);
         meetinglist.setOnItemClickListener(this);
 
 
+        weekForecast.clear();
+        weekForecast.add("steven8");
+
+
+        final String name= "name";
+        final String start= "start";
+        final String end = "end";
+        final String id= "id";
+
+        SimpleDateFormat duration =new SimpleDateFormat("HH:mm");
+        SimpleDateFormat weekday =new SimpleDateFormat("EEEE");
+        SimpleDateFormat monthday =new SimpleDateFormat( "MMMM dd");
+
+        weekday.setTimeZone(TimeZone.getTimeZone("GMT-5"));
+
+        String jsonStr = getJson(this.fileName);
+        try {
+            JSONArray array = new JSONArray(jsonStr);
+            int len = array.length();
+
+            JSONObject dayForecast = array.getJSONObject(50);
+            String begin= duration.format(new Date (dayForecast.getInt(start)*1000L));
+            String stop = duration.format(new Date( dayForecast.getInt(end)*1000L));
+            String description = dayForecast.getString(name);
+            Log.v(LOG_TAG, "Forecast entry: " + weekday.format(new Date (dayForecast.getInt(start)*1000L)));
+
+            meetDay.setText( weekday.format(new Date (dayForecast.getInt(start)*1000L))+ "\n" +monthday.format(new Date (dayForecast.getInt(start)*1000L)));
+            weekForecast.add(description+"\n"+begin+" - "+stop+"\n"+"Location");
+
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
     }
+    /**
+     *
+     */
+    private String getJson(String fileName) {
+
+        StringBuilder stringBuilder = new StringBuilder();
+        try {
+            BufferedReader bf = new BufferedReader(new InputStreamReader(
+                    getAssets().open(fileName)));
+            String line;
+            while ((line = bf.readLine()) != null) {
+                stringBuilder.append(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return stringBuilder.toString();
+    }
+
 
 
         @Override
@@ -111,7 +150,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             int duration = Toast.LENGTH_SHORT;
             Toast toast = Toast.makeText(context, text, duration);
             toast.show();
-            Intent intent=new Intent(this ,Detail.class).putExtra(Intent.EXTRA_TEXT,meeting);
+            Intent intent=new Intent(this ,Detail.class).putExtra(Intent.EXTRA_TEXT,meeting);// not only post the meeting
             startActivity(intent);
     }
 }
