@@ -6,7 +6,8 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 
 /**
- * Created by steven on 11-3-15.
+ * A welcome page of the application. Creating a new Thread and keep it about
+ * 2 sec before enter the MainActivity.
  */
 public class Welcome extends Activity {
     protected void onCreate(Bundle Steven) {
@@ -19,7 +20,7 @@ public class Welcome extends Activity {
             public void run()
             {
                 try{
-                    sleep(3000);
+                    sleep(2000);
 
                 }catch (InterruptedException e)
                 {
@@ -29,7 +30,7 @@ public class Welcome extends Activity {
                 finally {
 
                     Intent start1=new Intent("com.example.steven.conferencedaily.MainActivity");
-                    startActivity(start1);
+                    startActivity(start1);    // Enter the MainActivity after the welcome Page.
 
                 }
 

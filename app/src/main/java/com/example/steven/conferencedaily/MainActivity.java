@@ -1,9 +1,11 @@
 package com.example.steven.conferencedaily;
 
+import android.app.Presentation;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,40 +34,26 @@ import java.util.TimeZone;
 
 
 public class MainActivity extends ActionBarActivity implements AdapterView.OnItemClickListener {
+
     private ArrayAdapter<String> meetingAdaptor;
     private ListView meetinglist;
     private TextView meetDay;
     private final static String fileName = "events.json";
     private final String LOG_TAG=MainActivity.class.getSimpleName();
-    private List<String> weekForecast = new ArrayList<String>();
+    private List<String> meetingArray = new ArrayList<String>();
+    public static JSONArray  SortedList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
-        this.meetingAdaptor =
-                new ArrayAdapter<String>(
-                        this, // The current context (this activity)
-                        R.layout.list_item_forecast, // The name of the layout ID.
-                        R.id.list_item_forecast_textview, // The ID of the textview to populate.
-                        weekForecast
-                );
-
-        meetDay=(TextView)findViewById(R.id.textView);
-        meetinglist = (ListView) findViewById(R.id.listView);
-        meetinglist.setAdapter(meetingAdaptor);
-        meetinglist.setOnItemClickListener(this);
-
-
-        weekForecast.clear();
+        initialcomponent();
 
         final String name= "name";
         final String start= "start";
         final String end = "end";
-        final String id= "id";
 
-        SimpleDateFormat duration =new SimpleDateFormat("HH:mm");
+        SimpleDateFormat duration =new SimpleDateFormat("hh:mm a");
         SimpleDateFormat weekday =new SimpleDateFormat("EEEE");
         SimpleDateFormat monthday =new SimpleDateFormat( "MMMM dd");
 
@@ -77,32 +65,51 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
 
         try {
             JSONArray originArray = new JSONArray(jsonStr);
-            int len = originArray.length();
 
-
-            JSONArray array= meetingSort(originArray);
+            SortedList= meetingSort(originArray);
+            int len = SortedList.length();
 
             // inflate the meeting list to the list view
             for ( int i=0;i<=len;i++)
             {
-
-                JSONObject dayForecast = array.getJSONObject(i);
-                Date meetingtime1 = new Date(dayForecast.getInt(start) * 1000L);
-                Date meetingtime2 = new Date(dayForecast.getInt(end) * 1000L);
+                JSONObject MeetingObject = SortedList.getJSONObject(i);
+                Date meetingtime1 = new Date(MeetingObject .getInt(start) * 1000L);
+                Date meetingtime2 = new Date(MeetingObject .getInt(end) * 1000L);
                 String begin = duration.format(meetingtime1);
                 String stop = duration.format(meetingtime2);
                 String day = weekday.format(meetingtime1);
-                String description = dayForecast.getString(name);
-                weekForecast.add("\n"+description + "\n\n" +"Time: "+ day + " " + begin + " - " + stop+"\n");
+                String description = MeetingObject .getString(name);
+                meetingArray .add("\n"+description + "\n\n" +day + ", " + begin + " - " + stop+"\n");
             }
-          //  meetDay.setText( weekday.format(new Date (dayForecast.getInt(start)*1000L))+ "\n" +monthday.format(new Date (dayForecast.getInt(start)*1000L)));
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
     }
 
+    private void initialcomponent() {
+
+        this.meetingAdaptor =
+                new ArrayAdapter<String>(
+                        this, // The current context (this activity)
+                        R.layout.list_item_forecast, // The name of the layout ID.
+                        R.id.list_item_forecast_textview, // The ID of the textview to populate.
+                        meetingArray
+                );
+
+        meetDay=(TextView)findViewById(R.id.textView);
+        meetinglist = (ListView) findViewById(R.id.listView);
+        meetinglist.setAdapter(meetingAdaptor);
+        meetinglist.setOnItemClickListener(this);
+        meetingArray .clear();
+    }
+
+
+    /**
+     * Self-defined sorting function.
+     * Using the Collection built-in sorting function with the comparator to compare the starting time
+     * In addition, filter the duplicated object first to save the work.
+     */
     private JSONArray meetingSort( JSONArray originArray) {
         int flag=0;
         List<JSONObject> jsonValues = new ArrayList<>();
@@ -111,7 +118,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             flag = 0;
             try {
                 for (JSONObject a : jsonValues) {
-                    if (originArray.getJSONObject(i).getString("name").equals(a.getString("name")))
+                    if (originArray.getJSONObject(i).getString("name").equals(a.getString("name")))  // filter the duplicated JSON object
                     {
                         flag = 1;
                         break;
@@ -145,12 +152,11 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         });
 
         JSONArray sortedJsonArray = new JSONArray(jsonValues);
-      //  weekForecast.add(""+sortedJsonArray.length());
         return sortedJsonArray;
     }
 
     /**
-     *
+     * Get the Jason from the Jason file. Translate it to Jason string
      */
     private String getJson(String fileName) {
 
@@ -168,8 +174,6 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         return stringBuilder.toString();
     }
 
-
-
         @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -184,7 +188,10 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+        /**
+         * A shout dialogue activity if you click the menu and click the about button
+         * Enter the happening activity to see the happening list If cleck the WHAT HAPPENING button
+         */
         if (id == R.id.aboutus) {
             Intent about=new Intent(this,AboutUs.class);
             startActivity(about);
@@ -198,16 +205,31 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     *The extra function, to show the detail when you click on any meeting in the list.
+     * Now, it transmit the information of name and key to the Detail Activity
+     * For further use, can transmit more useful information of Jason object with parcel,
+     */
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-            String meeting=meetingAdaptor.getItem(position);
-            Context context =this;
+           Log.e(LOG_TAG,""+position);
+           String meetingname =new String();
+           String meetingid   = new String();
+           String meeting=meetingAdaptor.getItem(position);
+        try {
+            JSONObject sending = SortedList.getJSONObject(position);
+            meetingname = sending.getString("name");
+            meetingid= sending.getString("id");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+            Log.e(LOG_TAG,meetingname+"\n"+meetingid);
+        Context context =this;
             CharSequence text = meeting;
-            int duration = Toast.LENGTH_SHORT;
-            Toast toast = Toast.makeText(context, text, duration);
+            Toast toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
             toast.show();
-            Intent intent=new Intent(this ,Detail.class).putExtra(Intent.EXTRA_TEXT,meeting);// not only post the meeting
+            Intent intent=new Intent(this,Detail.class).putExtra(Intent.EXTRA_TEXT, "Presentation: "+meetingname+"\n\n"+"Key: "+meetingid);
             startActivity(intent);
     }
 }

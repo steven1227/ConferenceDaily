@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 
 /**
- * Created by steven on 5-3-15.
+ * A shot about me dialogue activity.
  */
 public class AboutUs extends Activity{
     @Override

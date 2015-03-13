@@ -2,7 +2,7 @@
     <string name="app_name">ConferenceDaily</string>
 
     <string name="action_settings">Settings</string>
-    <string name="Introduction">This is a sketch Application for the Conference Compass. This activity is used for elaborate the detail of the meeting.</string>
+    <string name="Introduction">This is a sketch Application for the Conference Compass. Developed by Rendong Liu, a student from TU/Delft.</string>
     <string name="left">Next</string>
     <string name="right">Before</string>
     <string name="now">What Happening</string>
